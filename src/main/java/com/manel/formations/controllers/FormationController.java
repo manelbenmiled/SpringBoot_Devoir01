@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -42,23 +43,41 @@ public class FormationController {
 	return "createFormation";
 	}
 	
+	
+	
+	
 	@RequestMapping("/ListeFormations")
-	public String listeFormations(ModelMap modelMap)
-	{
-	List<Formation> forms = formationService.getAllFormations();
-	modelMap.addAttribute("formations", forms);
-	return "listeFormations";
+	public String listeFormations(ModelMap modelMap,
+		@RequestParam (name="page",defaultValue = "0") int page,
+		@RequestParam (name="size", defaultValue = "2") int size)
+	
+	{   Page<Formation> forms = formationService.getAllFormationsParPage(page, size);
+		modelMap.addAttribute("formations", forms);
+		modelMap.addAttribute("pages", new int[forms.getTotalPages()]);
+		modelMap.addAttribute("currentPage", page);
+		return "listeFormations";
 	}
+	
+	
+	
+	
 	
 	@RequestMapping("/supprimerFormation")
 	public String supprimerFormation(@RequestParam("id") Long id,
-	ModelMap modelMap)
+	ModelMap modelMap,
+	@RequestParam (name="page",defaultValue = "0") int page,
+	@RequestParam (name="size", defaultValue = "2") int size)
 	{
 	formationService.deleteFormationById(id);
-	List<Formation> forms = formationService.getAllFormations();
+	Page<Formation> forms = formationService.getAllFormationsParPage(page, size);
 	modelMap.addAttribute("formations", forms);
+	modelMap.addAttribute("pages", new int[forms.getTotalPages()]);
+	modelMap.addAttribute("currentPage", page);
+	modelMap.addAttribute("size", size);
 	return "listeFormations";
 	}
+	
+	
 	
 	@RequestMapping("/modifierFormation")
 	public String editerFormation(@RequestParam("id") Long id,ModelMap modelMap)
